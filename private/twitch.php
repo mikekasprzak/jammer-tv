@@ -63,16 +63,56 @@ const TAG_IDS = [
 // game_id=0&game_id=...
 
 function QueryString_Add(&$qs, $key, $value) {
-	if ( strlen($qs) > 0 ) {
+	if (strlen($qs) > 0) {
 		$qs .= "&";
 	}
 	$qs .= $key . "=" . $value;
 }
 
+// Convert a querystring to a flat array of key/value pairs
+function QueryString_ToArray($qs) {
+	$kv = explode('&', $qs);
+	$pairs = [];
+	foreach ($kv as &$value) {
+		$pairs[] = explode('=', $value);
+	}
+
+	return $pairs;
+}
+
+// Convert a querystring to an indexable array object, and any time multiple entries come up create an array
+function QueryString_Parse($qs) {
+	$kv = explode('&', $qs);
+	$out = [];
+	foreach ($kv as &$value) {
+		list($key, $value) = explode('=', $value);
+		if (array_key_exists($key, $out)) {
+			if (is_array($out[$key])) {
+				$out[$key][] = $value;
+			}
+			else {
+				$out[$key] = [$out[$key]];
+				$out[$key][] = $value;
+			}
+		}
+		else {
+			$out[$key] = $value;
+		}
+	}
+
+	return $out;
+}
+
 $qs = "";
 QueryString_Add($qs, "first", 100);
-foreach (USER_IDS as &$key) {
+foreach (GAME_IDS as &$key) {
 	QueryString_Add($qs, "game_id", $key);
 }
 //QueryString_Add($qs, "after", $pagination);
+
+echo(json_encode(QueryString_Parse($qs))."\n");
+
+// Step 1: Fetch all the data
+
+// Step 2: Parse the data
 
