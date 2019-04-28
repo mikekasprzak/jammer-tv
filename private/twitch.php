@@ -1,6 +1,9 @@
 <?php
-
 namespace twitch;
+
+require_once __DIR__."/../config.php";
+require_once __DIR__."/../common/querystring.php";
+require_once __DIR__."/../common/fetch_twitch.php";
 
 // Lookup by Id: https://api.twitch.tv/helix/users?id=69760921
 const USER_IDS = [
@@ -10,15 +13,15 @@ const USER_IDS = [
 // Lookup by Name: https://api.twitch.tv/helix/games?name=Under%20Development
 // Lookup by Id:   https://api.twitch.tv/helix/games?id=509670
 const GAME_IDS = [
-	"509670",	// Science & Technology
-	"509660",	// Art
-	"509673",	// Makers & Crafting
+//	"509670",	// Science & Technology
+//	"509660",	// Art
+//	"509673",	// Makers & Crafting
 	"509663",	// Special Events
-	"26936",	// Music & Performing Arts
-	"509667",	// Food & Drink
-	"509658",	// Just Chatting
-	"509868",	// Under Development
-	"0",		// no game set
+//	"26936",	// Music & Performing Arts
+//	"509667",	// Food & Drink
+//	"509658",	// Just Chatting
+//	"509868",	// Under Development
+//	"0",		// no game set
 ];
 
 // View Tags:    https://www.twitch.tv/directory/all/tags/c8d6d6ee-3b02-4ae7-81e9-4c0f434941cc
@@ -57,62 +60,31 @@ const TAG_IDS = [
 
 // Get data: https://api.twitch.tv/helix/streams?game_id=509670
 
-
-// first=100
-// after=key
-// game_id=0&game_id=...
-
-function QueryString_Add(&$qs, $key, $value) {
-	if (strlen($qs) > 0) {
-		$qs .= "&";
-	}
-	$qs .= $key . "=" . $value;
-}
-
-// Convert a querystring to a flat array of key/value pairs
-function QueryString_ToArray($qs) {
-	$kv = explode('&', $qs);
-	$pairs = [];
-	foreach ($kv as &$value) {
-		$pairs[] = explode('=', $value);
-	}
-
-	return $pairs;
-}
-
-// Convert a querystring to an indexable array object, and any time multiple entries come up create an array
-function QueryString_Parse($qs) {
-	$kv = explode('&', $qs);
-	$out = [];
-	foreach ($kv as &$value) {
-		list($key, $value) = explode('=', $value);
-		if (array_key_exists($key, $out)) {
-			if (is_array($out[$key])) {
-				$out[$key][] = $value;
-			}
-			else {
-				$out[$key] = [$out[$key]];
-				$out[$key][] = $value;
-			}
-		}
-		else {
-			$out[$key] = $value;
-		}
-	}
-
-	return $out;
-}
-
-$qs = "";
-QueryString_Add($qs, "first", 100);
+// Build QueryString
+$baseQS = "";
+QueryString_Add($baseQS, "first", 100);			// How many to return (max 100)
 foreach (GAME_IDS as &$key) {
-	QueryString_Add($qs, "game_id", $key);
+	QueryString_Add($baseQS, "game_id", $key);	// Which games to search
 }
-//QueryString_Add($qs, "after", $pagination);
 
-echo(json_encode(QueryString_Parse($qs))."\n");
+$data = [];
+$response = [];
+$pagination = "";
 
 // Step 1: Fetch all the data
+do {
+	$qs = $baseQS;
+	if (strlen($pagination)) {
+		QueryString_Add($baseQS, "after", $pagination);	// Pagination offset (if available)
+	}
+	$response = Fetch_Twitch("streams?".$qs);
+	$data = array_merge($data, $response['data']);
+
+	$pagination = "";
+	if (array_key_exists('pagination', $response) && array_key_exists('cursor', $response['pagination'])) {
+		$pagination =$response['pagination']['cursor'];
+	}
+} while (strlen($pagination));
 
 // Step 2: Parse the data
-
+echo(json_encode(QueryString_Parse($data))."\n");
