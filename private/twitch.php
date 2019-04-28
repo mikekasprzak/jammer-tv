@@ -55,5 +55,24 @@ const TAG_IDS = [
 	"6ea6bca4-4712-4ab9-a906-e3336a9d8039",	// English
 ];
 
+// Get data: https://api.twitch.tv/helix/streams?game_id=509670
 
+
+// first=100
+// after=key
+// game_id=0&game_id=...
+
+function QueryString_Add(&$qs, $key, $value) {
+	if ( strlen($qs) > 0 ) {
+		$qs .= "&";
+	}
+	$qs .= $key . "=" . $value;
+}
+
+$qs = "";
+QueryString_Add($qs, "first", 100);
+foreach (USER_IDS as &$key) {
+	QueryString_Add($qs, "game_id", $key);
+}
+//QueryString_Add($qs, "after", $pagination);
 
