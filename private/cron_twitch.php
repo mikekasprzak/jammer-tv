@@ -1,14 +1,15 @@
 <?php
 namespace twitch;
 
-require_once __DIR__."/../config.php";
 require_once __DIR__."/../common/querystring.php";
 require_once __DIR__."/../common/fetch_twitch.php";
 
+exit(1);
+
 // Lookup by Id: https://api.twitch.tv/helix/users?id=69760921
-const USER_IDS = [
-	"69760921", // LudumDare
-];
+//const USER_IDS = [
+//	"69760921", // LudumDare
+//];
 
 // Lookup by Name: https://api.twitch.tv/helix/games?name=Under%20Development
 // Lookup by Id:   https://api.twitch.tv/helix/games?id=509670
@@ -58,7 +59,7 @@ const TAG_IDS = [
 	"6ea6bca4-4712-4ab9-a906-e3336a9d8039",	// English
 ];
 
-// Get data: https://api.twitch.tv/helix/streams?game_id=509670
+// Get data: https://api.twitch.tv/helix/streams?first=100&game_id=509670&game_id=509660&after=eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ
 
 // Build QueryString
 $baseQS = "";
@@ -88,3 +89,5 @@ do {
 
 // Step 2: Parse the data
 echo(json_encode(QueryString_Parse($data))."\n");
+
+echo "Found: ".count($data)."\n";

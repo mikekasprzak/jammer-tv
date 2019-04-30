@@ -1,4 +1,15 @@
 <?php
+// Internal
+const DB_HOST = 'localhost';
+const DB_PORT = 0;
+const DB_USER = '';
+const DB_PASSWORD = '';
+const DB_SOCKET = '';					// optional
 
+const REDIS_HOST = 'localhost';
+const REDIS_PORT = 6379;
+const REDIS_PREFIX = '';				// optional
+
+// External
 const TWITCH_CLIENT_ID = "";
 const TWITCH_CLIENT_SECRET = "";

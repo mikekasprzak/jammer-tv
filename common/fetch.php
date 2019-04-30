@@ -1,6 +1,6 @@
 <?php
 
-function Fetch_Raw($url, $postdata = null, $headers = null) {
+function fetch_Raw($url, $postdata = null, $headers = null) {
 	$curl = curl_init();
 	curl_setopt($curl, CURLOPT_URL, $url);
 	curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -26,6 +26,6 @@ function Fetch_Raw($url, $postdata = null, $headers = null) {
 	return $response;
 }
 
-function Fetch_Json($url, $postdata = null, $headers = null) {
-	return json_decode(Fetch_Raw($url, $postdata, $headers), true);
+function fetch_Json($url, $postdata = null, $headers = null) {
+	return json_decode(fetch_Raw($url, $postdata, $headers), true);
 }
