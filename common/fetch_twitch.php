@@ -20,20 +20,20 @@ function fetch_TwitchID($url, $postdata = null, $headers = []) {
 
 function token_GetClientCredentials() {
 	$qs = "";
-	QueryString_Add($qs, "client_id", TWITCH_CLIENT_ID);
-	QueryString_Add($qs, "client_secret", TWITCH_CLIENT_SECRET);
-	QueryString_Add($qs, "grant_type", "client_credentials");
+	qs_Add($qs, "client_id", TWITCH_CLIENT_ID);
+	qs_Add($qs, "client_secret", TWITCH_CLIENT_SECRET);
+	qs_Add($qs, "grant_type", "client_credentials");
 
 	return fetch_TwitchID("token?".$qs, "");
 }
 
-function token_Validate($token = null) {
+function token_Validate($token = null): ?bool {
 	global $bearer;
 	if (is_null($token)) {
 		$token = $bearer;
 	}
 
-	if (!$token) {
+	if (is_string($token)) {
 		$ret = fetch_TwitchID("validate", "" /* trigger HTTP POST */, ["Authorization: OAuth ".$token]);
 		return $ret && array_key_exists('client_id', $ret) && ($ret['client_id'] == TWITCH_CLIENT_ID);
 	}
@@ -46,17 +46,17 @@ function token_Revoke($token = null) {
 		$token = $bearer;
 	}
 
-	if ($token) {
+	if (is_string($token)) {
 		$qs = "";
-		QueryString_Add($qs, "client_id", TWITCH_CLIENT_ID);
-		QueryString_Add($qs, "token", $token);
+		qs_Add($qs, "client_id", TWITCH_CLIENT_ID);
+		qs_Add($qs, "token", $token);
 
 		return fetch_TwitchID("revoke?".$qs, "" /* trigger HTTP POST */);
 	}
 	return null;
 }
 
-function token_Do() {
+function token_Fetch() {
 	global $bearer;
 	global $bearer_modified;
 
@@ -75,12 +75,10 @@ function token_Do() {
 
 		echo "b: ".json_encode($bearer)."    bm: ".$bearer_modified."\n";
 
-		ds_Set(BEARER_API_BASE."KEY", $bearer, 10);
-		ds_Set(BEARER_API_BASE."MODIFIED", $bearer_modified, 10);
+		ds_Set(BEARER_API_BASE."KEY", $bearer);
+		ds_Set(BEARER_API_BASE."MODIFIED", $bearer_modified);
 	}
 }
-token_Do();
-
 
 
 function fetch_TwitchAPI($url, $postdata = null, $_headers = null) {
@@ -88,18 +86,21 @@ function fetch_TwitchAPI($url, $postdata = null, $_headers = null) {
 
 	// Build headers list
 	$headers = [
-	//	"Accept: application/vnd.twitchtv.v5+json",
 		"Client-ID: ".TWITCH_CLIENT_ID
 	];
 
-	if ($bearer) {
+	if (is_string($bearer)) {
 		$headers[] = "Authorization: Bearer ".$bearer;
 	}
 
-	if (!is_null($_headers)) {
+	if (is_array($_headers)) {
 		$headers = array_merge($headers, $_headers);
 	}
 
 	// Fetch
-	return Fetch_Json(API_URL.$url, $postdata, $headers);
+	$ret = Fetch_Json(API_BASE.$url, $postdata, $headers, false);
+	var_dump($ret[0]);
+	var_dump($ret[1]);
+
+	return $ret[2];
 }

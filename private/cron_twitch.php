@@ -4,8 +4,6 @@ namespace twitch;
 require_once __DIR__."/../common/querystring.php";
 require_once __DIR__."/../common/fetch_twitch.php";
 
-exit(1);
-
 // Lookup by Id: https://api.twitch.tv/helix/users?id=69760921
 //const USER_IDS = [
 //	"69760921", // LudumDare
@@ -61,13 +59,16 @@ const TAG_IDS = [
 
 // Get data: https://api.twitch.tv/helix/streams?first=100&game_id=509670&game_id=509660&after=eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ
 
+token_Fetch();
+
 // Build QueryString
 $baseQS = "";
-QueryString_Add($baseQS, "first", 100);			// How many to return (max 100)
+qs_Add($baseQS, "first", 100);			// How many to return (max 100)
 foreach (GAME_IDS as &$key) {
-	QueryString_Add($baseQS, "game_id", $key);	// Which games to search
+	qs_Add($baseQS, "game_id", $key);	// Which games to search
 }
 
+$request_count = 0;
 $data = [];
 $response = [];
 $pagination = "";
@@ -76,18 +77,29 @@ $pagination = "";
 do {
 	$qs = $baseQS;
 	if (strlen($pagination)) {
-		QueryString_Add($baseQS, "after", $pagination);	// Pagination offset (if available)
+		qs_Add($qs, "after", $pagination);	// Pagination offset (if available)
 	}
-	$response = Fetch_Twitch("streams?".$qs);
-	$data = array_merge($data, $response['data']);
 
-	$pagination = "";
-	if (array_key_exists('pagination', $response) && array_key_exists('cursor', $response['pagination'])) {
-		$pagination =$response['pagination']['cursor'];
+	$request = "streams?".$qs;
+	$response = fetch_TwitchAPI($request);
+	$request_count++;
+
+	if (is_array($response)) {
+		//var_dump($response);
+		$data = array_merge($data, $response['data']);
+
+		$pagination = "";
+		if (array_key_exists('pagination', $response) && array_key_exists('cursor', $response['pagination'])) {
+			$pagination = $response['pagination']['cursor'];
+		}
+	}
+	else {
+		break;
 	}
 } while (strlen($pagination));
 
 // Step 2: Parse the data
-echo(json_encode(QueryString_Parse($data))."\n");
+//echo(json_encode($data)."\n");
 
 echo "Found: ".count($data)."\n";
+echo "Requests made: $request_count\n";
