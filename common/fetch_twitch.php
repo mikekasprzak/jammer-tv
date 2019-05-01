@@ -58,25 +58,46 @@ function token_Revoke($token = null) {
 
 function token_Fetch() {
 	global $bearer;
+	global $bearer_raw;
 	global $bearer_modified;
 
 	// Attempt 1: Read from cache
 	if (!$bearer) {
 		$bearer = ds_Get(BEARER_API_BASE."KEY");
+		$bearer_raw = ds_Get(BEARER_API_BASE."RAW");
 		$bearer_modified = ds_Get(BEARER_API_BASE."MODIFIED");
 
+		//echo "Bearer cached: $bearer -- ".json_encode($bearer_raw)." -- $bearer_modified\n";
+
 		// TODO: If modified time was a while ago, revalidate
+		if (time() - $bearer_modified > (60*2)) {
+			if (!token_Validate()) {
+				$bearer = null;
+			}
+			else {
+				$bearer_modified = time();
+				ds_Set(BEARER_API_BASE."MODIFIED", $bearer_modified);
+			}
+		}
 	}
 
 	// Attempt 2: Regenerate
 	if (!$bearer) {
-		$bearer = token_GetClientCredentials();
-		$bearer_modified = time();
+		$bearer_raw = token_GetClientCredentials();
 
-		echo "b: ".json_encode($bearer)."    bm: ".$bearer_modified."\n";
+		if (array_key_exists('access_token', $bearer_raw)) {
+			$bearer = $bearer_raw['access_token'];
+			$bearer_modified = time();
 
-		ds_Set(BEARER_API_BASE."KEY", $bearer);
-		ds_Set(BEARER_API_BASE."MODIFIED", $bearer_modified);
+			//echo "Bearer cached: $bearer -- ".json_encode($bearer_raw)." -- $bearer_modified\n";
+
+			ds_Set(BEARER_API_BASE."KEY", $bearer);
+			ds_Set(BEARER_API_BASE."RAW", $bearer_raw);
+			ds_Set(BEARER_API_BASE."MODIFIED", $bearer_modified);
+		}
+		else {
+			echo "uhhhh... this was supposed to work.\n";
+		}
 	}
 }
 

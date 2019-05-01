@@ -99,7 +99,7 @@ do {
 } while (strlen($pagination));
 
 // Step 2: Parse the data
-//echo(json_encode($data)."\n");
+echo(json_encode($data)."\n");
 
 echo "Found: ".count($data)."\n";
 echo "Requests made: $request_count\n";

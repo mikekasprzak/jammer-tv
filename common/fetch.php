@@ -58,6 +58,9 @@ function fetch_Raw($url, $postdata = null, $headers = null, $body_only = true) {
 	//var_dump( curl_getinfo($curl) );
 
 	curl_close($curl);
+
+	// IMPORTANT: If httpHeader_parse doesn't work right, consider using CURLOPT_HEADERFUNCTION instead
+	//            Source: https://stackoverflow.com/a/41135574
 	return $body_only ? $response_body : [$response_code, httpHeader_parse($response_header), $response_body];
 }
 
