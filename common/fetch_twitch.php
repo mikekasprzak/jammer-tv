@@ -11,15 +11,10 @@ const ID_BASE = "https://id.twitch.tv/oauth2/";
 
 // Lookup the bearer, if we have it
 const BEARER_API_BASE = "TWITCH_BEARER_API_";
-$bearer = ds_Get(BEARER_API_BASE."KEY");
-$bearer_modified = ds_Get(BEARER_API_BASE."MODIFIED");
-// todo: that false check thing
-
-echo "b: ".json_encode($bearer)."    bm: ".$bearer_modified."\n";
+$bearer = null;
+$bearer_modified = null;
 
 function fetch_TwitchID($url, $postdata = null, $headers = []) {
-	echo $url."/n";
-
 	return Fetch_Json(ID_BASE.$url, $postdata, $headers);
 }
 
@@ -65,6 +60,15 @@ function token_Do() {
 	global $bearer;
 	global $bearer_modified;
 
+	// Attempt 1: Read from cache
+	if (!$bearer) {
+		$bearer = ds_Get(BEARER_API_BASE."KEY");
+		$bearer_modified = ds_Get(BEARER_API_BASE."MODIFIED");
+
+		// TODO: If modified time was a while ago, revalidate
+	}
+
+	// Attempt 2: Regenerate
 	if (!$bearer) {
 		$bearer = token_GetClientCredentials();
 		$bearer_modified = time();
