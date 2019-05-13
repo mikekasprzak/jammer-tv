@@ -1,8 +1,8 @@
 <?php
 namespace twitch;
 
-require_once __DIR__."/../common/querystring.php";
-require_once __DIR__."/../common/fetch_twitch.php";
+require_once __DIR__."/../../common/lib/querystring.php";
+require_once __DIR__."/../../common/lib/fetch_twitch.php";
 
 // Lookup by Id: https://api.twitch.tv/helix/users?id=69760921
 //const USER_IDS = [
