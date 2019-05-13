@@ -11,5 +11,15 @@ const REDIS_PORT = 6379;
 const REDIS_PREFIX = '';				// optional
 
 // External
+const API_BASE_URI = "/api/";		// "//api.jammer.tv";
+const STATIC_BASE_URI = "/static/";	// "//static.jammer.tv";
+
+// Alphabetical
+const GOOGLE_CLIENT_ID = "";
+const GOOGLE_CLIENT_SECRET = "";
+
+const MIXER_CLIENT_ID = "";
+const MIXER_CLIENT_SECRET = "";
+
 const TWITCH_CLIENT_ID = "";
 const TWITCH_CLIENT_SECRET = "";
